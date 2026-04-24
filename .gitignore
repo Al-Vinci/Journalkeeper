@@ -1,0 +1,5 @@
+.venv
+.vscode
+_pycache_
+saved_wavs
+.env
