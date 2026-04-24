@@ -18,9 +18,12 @@ def worker():
         try:
             transcript = client.audio.transcriptions.create(
                 model="gpt-4o-transcribe",
-                file=audio_chunk
+                file=audio_chunk,
+                language="sv",
+                prompt="Detta är svensk veterinärdiktering. Transkribera bara det som faktiskt sägs."
             )
-            text_queue.put(transcript.text)
+            if transcript.text and transcript.text.strip():
+                text_queue.put(transcript.text.strip())
         except Exception as e:
             text_queue.put(f"[Fel]: {e}")
 

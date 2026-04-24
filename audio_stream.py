@@ -12,7 +12,9 @@ class AudioProcessor(AudioProcessorBase):
         self.buffer = []
         self.sample_rate = 16000
         self.buffered_samples = 0
-        self.chunk_samples = self.sample_rate * 3
+        self.chunk_samples = self.sample_rate * 2
+        self.min_rms = 0.003
+        self.min_peak = 0.02
         self.resampler = av.AudioResampler(
             format="s16",
             layout="mono",
@@ -46,6 +48,16 @@ class AudioProcessor(AudioProcessorBase):
 
         return frames
 
+    def chunk_has_speech(self, audio_data):
+        if audio_data.size == 0:
+            return False
+
+        normalized = audio_data.astype(np.float32) / 32768.0
+        rms = float(np.sqrt(np.mean(np.square(normalized))))
+        peak = float(np.max(np.abs(normalized)))
+        print(f"🔉 Chunk stats rms={rms:.5f} peak={peak:.5f}")
+        return rms >= self.min_rms or peak >= self.min_peak
+
     def send_chunk(self):
         print("🚀 Sending chunk!")
         if not self.buffer:
@@ -56,6 +68,10 @@ class AudioProcessor(AudioProcessorBase):
         audio_data = np.concatenate(self.buffer)
         self.buffer = []
         self.buffered_samples = 0
+
+        if not self.chunk_has_speech(audio_data):
+            print("🔇 Skipping silent chunk")
+            return
 
         wav_io = io.BytesIO()
         with wave.open(wav_io, "wb") as wf:

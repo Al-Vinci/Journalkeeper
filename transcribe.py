@@ -7,6 +7,8 @@ def transcribe_audio(file_path):
     with open(file_path, "rb") as f:
         transcript = client.audio.transcriptions.create(
             model="gpt-4o-transcribe",
-            file=f
+            file=f,
+            language="sv",
+            prompt="Detta är svensk veterinärdiktering. Transkribera bara det som faktiskt sägs."
         )
     return transcript.text
