@@ -4,3 +4,4 @@ python-dotenv
 streamlit-webrtc
 numpy
 av
+webrtcvad-wheels
