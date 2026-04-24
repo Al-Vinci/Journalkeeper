@@ -1,42 +1,54 @@
 import streamlit as st
 import time
 from streamlit_webrtc import webrtc_streamer
+
 from audio import cleanup_file, clear_saved_wavs, list_saved_wavs, save_temp_audio
 from audio_stream import AudioProcessor
+from generate import generate_journal
 from stream_transcribe import text_queue
 from transcribe import transcribe_audio
-from generate import generate_journal
+
 
 st.set_page_config(page_title="Vet Journal AI", layout="wide")
 
-st.title("🐾 Veterinärjournal – AI-utkast")
-st.warning("Detta är ett UTKAST. Måste granskas av veterinär innan användning.")
+st.title("Veterinarjournal - AI-utkast")
+st.warning("Detta ar ett UTKAST. Maste granskas av veterinär innan anvandning.")
 
-st.subheader("🎙️ Live transkribering")
+st.subheader("Live transkribering")
 
+if "echo_cancellation" not in st.session_state:
+    st.session_state.echo_cancellation = False
+if "noise_suppression" not in st.session_state:
+    st.session_state.noise_suppression = False
+if "auto_gain_control" not in st.session_state:
+    st.session_state.auto_gain_control = False
+if "full_text" not in st.session_state:
+    st.session_state.full_text = ""
+
+with st.expander("Mikrofoninstallningar", expanded=True):
+    st.checkbox("Echo cancellation", key="echo_cancellation")
+    st.checkbox("Noise suppression", key="noise_suppression")
+    st.checkbox("Auto gain control", key="auto_gain_control")
+    st.caption("Om ljudet blir avhugget eller pumpande: lat alla tre vara avstangda.")
 
 webrtc_ctx = webrtc_streamer(
-    key="live3",  # viktigt: ny key
+    key="live3",
     audio_processor_factory=AudioProcessor,
     rtc_configuration={
         "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
     },
     media_stream_constraints={
         "audio": {
-            "echoCancellation": True,
-            "noiseSuppression": True,
-            "autoGainControl": True,
+            "echoCancellation": st.session_state.echo_cancellation,
+            "noiseSuppression": st.session_state.noise_suppression,
+            "autoGainControl": st.session_state.auto_gain_control,
         },
         "video": False,
     },
-    async_processing=True,  # 🔥 KRITISK
+    async_processing=True,
 )
 
 output = st.empty()
-
-# 🔁 Spara text i session (viktigt!)
-if "full_text" not in st.session_state:
-    st.session_state.full_text = ""
 
 if webrtc_ctx.state.playing:
     new_texts = []
@@ -51,6 +63,8 @@ if webrtc_ctx.state.playing:
 
     time.sleep(0.2)
     st.rerun()
+elif st.session_state.full_text:
+    output.markdown(st.session_state.full_text)
 
 st.subheader("Sparade backupfiler")
 
@@ -66,23 +80,21 @@ if saved_wavs:
         st.write(wav_path.name)
         st.audio(str(wav_path), format="audio/wav")
 else:
-    st.info("Inga sparade WAV-filer än.")
+    st.info("Inga sparade WAV-filer an.")
 
 audio_file = st.file_uploader("Ladda upp ljud (wav/mp3/m4a)", type=["wav", "mp3", "m4a"])
 
 if audio_file is None:
-    st.info("Ladda upp en ljudfil för att börja")
+    st.info("Ladda upp en ljudfil for att borja")
     st.stop()
 
 file_extension = audio_file.name.split(".")[-1].lower()
 
 if file_extension not in ["wav", "mp3", "m4a"]:
-    st.error("Endast wav/mp3/m4a stöds")
+    st.error("Endast wav/mp3/m4a stods")
     st.stop()
 
 tmp_path = save_temp_audio(audio_file.read(), file_extension)
-
-
 
 try:
     st.info("Transkriberar...")
@@ -98,6 +110,5 @@ try:
     st.text_area("Redigera vid behov", journal, height=300)
 
     st.success("Klart! Kopiera texten manuellt till journalsystemet.")
-
 finally:
     cleanup_file(tmp_path)
