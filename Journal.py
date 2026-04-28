@@ -14,7 +14,7 @@ st.set_page_config(page_title="Vet Journal AI", layout="wide")
 
 # Visar rubrik och en tydlig varning om att texten bara ar ett utkast.
 st.title("Veterinarjournal - AI-utkast")
-st.warning("Detta ar ett UTKAST. Maste granskas av veterinär innan anvandning.")
+st.warning("Detta är ett UTKAST. Måste granskas av veterinär innan användning.")
 
 # Den här delen av sidan hanterar live-transkribering fran mikrofonen.
 st.subheader("Live transkribering")
@@ -29,13 +29,6 @@ if "auto_gain_control" not in st.session_state:
 if "full_text" not in st.session_state:
     st.session_state.full_text = ""
 
-# Låt användaren slå av eller på webbläsarens inbyggda ljudbehandling.
-# Detta behövs eftersom vissa filter kan göra dikterat tal avhugget eller inkomplett.
-with st.expander("Mikrofoninstallningar", expanded=True):
-    st.checkbox("Echo cancellation", key="echo_cancellation")
-    st.checkbox("Noise suppression", key="noise_suppression")
-    st.checkbox("Auto gain control", key="auto_gain_control")
-    st.caption("Om ljudet blir avhugget eller pumpande: lat alla tre vara avstangda.")
 
 # Startar WebRTC-förbindelsen som tar emot mikrofonljud i realtid.
 # AudioProcessor gör själva bearbetningen av ljudet innan transkribering.
@@ -78,6 +71,14 @@ elif st.session_state.full_text:
     # Visar tidigare transkriberad text när inspelningen har stoppat.
     output.markdown(st.session_state.full_text)
 
+# Låt användaren slå av eller på webbläsarens inbyggda ljudbehandling.
+# Detta behövs eftersom vissa filter kan göra dikterat tal avhugget eller inkomplett.
+with st.expander("Mikrofoninställningar", expanded=True):
+    st.checkbox("Echo cancellation", key="echo_cancellation")
+    st.checkbox("Noise suppression", key="noise_suppression")
+    st.checkbox("Auto gain control", key="auto_gain_control")
+    st.caption("Om ljudet blir avhugget eller pumpande: låt alla tre vara avstängda.")
+    
 # Den här delen visar sparade backupfiler från live-inspelning.
 st.subheader("Sparade backupfiler")
 
@@ -96,14 +97,14 @@ if saved_wavs:
         st.write(wav_path.name)
         st.audio(str(wav_path), format="audio/wav")
 else:
-    st.info("Inga sparade WAV-filer an.")
+    st.info("Inga sparade WAV-filer än.")
 
 # Den här delen hanterar vanlig filuppladdning som alternativ till live-inspelning.
 audio_file = st.file_uploader("Ladda upp ljud (wav/mp3/m4a)", type=["wav", "mp3", "m4a"])
 
 # Stoppar resten av flödet tills en fil faktiskt valts.
 if audio_file is None:
-    st.info("Ladda upp en ljudfil for att borja")
+    st.info("Ladda upp en ljudfil för att börja")
     st.stop()
 
 # Hämtar filändelsen för att kunna validera formatet.
