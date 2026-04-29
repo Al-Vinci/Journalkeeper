@@ -1,31 +1,50 @@
 from openai import OpenAI
 from config import OPENAI_API_KEY_JOURNAL
+import json
 
 
 # Skapar en OpenAI-klient som anvands for att omvandla transkriberad text till ett journalutkast.
 client = OpenAI(api_key=OPENAI_API_KEY_JOURNAL)
 
 
-# Tar den transkriberade texten och ber modellen skapa en journal i SOAP-format.
-# Prompten ar restriktiv for att minska risken att modellen hittar pa information.
+# Tar den transkriberade texten och ber modellen skapa en journal.
+# Prompten ar restriktiv for att minska risken att modellen hittar på information.
 def generate_journal(text):
-    prompt = f"""
-Du ar en veterinär assistent.
+    response = client.responses.create(
+        model="gpt-5.4-mini",
+        temperature=0,
+        input=[
+            {
+                "role": "system",
+                "content": (
+                    "Du är en svensk veterinär assistent. "
+                    "Skriv kortfattat, strukturerat och kliniskt. "
+                    "Hitta inte på information. "
+                    "Om något saknas, lämna rubriken tom utan extra text."
+                )
+            },
+            {
+                "role": "user",
+                "content": f"""
+Skapa en veterinärmedicinsk journal med exakt följande struktur:
 
-Skapa en journal i SOAP-format.
+Anamnes/Historik:
+Klinisk undersökning:
+Problemlista:
+Differentialdiagnoser:
+Behandling:
+Behandlingsplan:
 
 Regler:
-- Skriv ENDAST det som explicit namns
-- Hitta inte pa information
-- Om nagot saknas, lamna tomt
+- Använd exakt rubrikerna ovan
+- Skriv endast det som explicit nämns
+- Ingen extra text före eller efter
 
 Text:
 {text}
 """
-
-    response = client.chat.completions.create(
-        model="gpt-4.1",
-        messages=[{"role": "user", "content": prompt}]
+            }
+        ]
     )
 
-    return response.choices[0].message.content
+    return response.output[0].content[0].text
