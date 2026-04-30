@@ -1,6 +1,5 @@
 from openai import OpenAI
 from config import OPENAI_API_KEY_JOURNAL
-import json
 
 
 # Skapar en OpenAI-klient som anvands for att omvandla transkriberad text till ett journalutkast.
