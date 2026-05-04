@@ -60,7 +60,7 @@ class AudioProcessor(AudioProcessorBase):
         self.speech_frames_in_chunk = 0
         self.chunk_counter = 0
 
-        # Resamplern gör om inkommande ljud till mono 16-bit 16 kHz sa att resten av kedjan får ett enhetligt format.
+        # Resamplern gör om inkommande ljud till mono 16-bit 16 kHz så att resten av kedjan får ett enhetligt format.
         self.resampler = av.AudioResampler(
             format="s16",
             layout="mono",
@@ -78,8 +78,6 @@ class AudioProcessor(AudioProcessorBase):
     # recv_queued får inkommande ljudframes från streamlit-webrtc i batchar.
     # Varje frame resamplas, sparas i backupfilen och skickas vidare till VAD-logiken.
     async def recv_queued(self, frames):
-        print("recv_queued called, frames:", len(frames))
-
         for frame in frames:
             resampled_frames = self.resampler.resample(frame)
             for resampled_frame in resampled_frames:
@@ -135,7 +133,7 @@ class AudioProcessor(AudioProcessorBase):
         else:
             self.trailing_silence_frames += 1
 
-        # Avslutar chunken om den blivit för lång, men fortsatter direkt med overlap i nästa chunk.
+        # Avslutar chunken om den blivit för lång, men fortSätter direkt med overlap i nästa chunk.
         if len(self.current_chunk_frames) >= self.max_chunk_frames:
             print("Finalizing chunk at max length")
             self.finalize_chunk(continue_speech=True)

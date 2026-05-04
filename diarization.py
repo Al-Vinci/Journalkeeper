@@ -29,7 +29,7 @@ def infer_speaker_roles(segments):
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4.1-mini",
+            model="gpt-5.4-mini",
             temperature=0,
             messages=[
                 {
@@ -91,37 +91,32 @@ def build_diarization_result(transcript):
 
     speaker_roles = infer_speaker_roles(segments)
     diarized_text = format_diarized_segments(segments, speaker_roles)
-    plain_text = cleanup_transcript_text(transcript.text or "")
 
     return {
-        "plain_text": plain_text,
-        "diarized_text": diarized_text or plain_text,
+        "diarized_text": diarized_text,
         "speaker_roles": speaker_roles,
         "segments": segments,
     }
 
 
-# Kör röstbaserad diarization på ett filobjekt och kompletterar med GPT-baserad rolltolkning.
+# Kör endast röstbaserad diarization på ett filobjekt och kompletterar med GPT-baserad rolltolkning.
 # Denna används för live-chunkar där ljudet redan finns i minnet.
-def transcribe_audio_fileobj_with_diarization(file_obj):
+# chunking_strategy sätts till auto eftersom diarization-modellen kräver chunking
+# och detta format fungerar stabilare med klientbiblioteket än ett nästlat server_vad-objekt.
+def diarize_audio_fileobj(file_obj):
     transcript = client.audio.transcriptions.create(
         model="gpt-4o-transcribe-diarize",
         file=file_obj,
         response_format="diarized_json",
         language="sv",
-        chunking_strategy={
-            "type": "server_vad",
-            "prefix_padding_ms": 300,
-            "silence_duration_ms": 450,
-            "threshold": 0.5,
-        },
+        chunking_strategy="auto",
         temperature=0,
     )
     return build_diarization_result(transcript)
 
 
-# Kör röstbaserad diarization på en ljudfil på disk.
+# Kör endast röstbaserad diarization på en ljudfil på disk.
 # Denna används för uppladdade filer och sparade backupfiler.
-def transcribe_audio_with_diarization(file_path):
+def diarize_audio(file_path):
     with open(file_path, "rb") as f:
-        return transcribe_audio_fileobj_with_diarization(f)
+        return diarize_audio_fileobj(f)

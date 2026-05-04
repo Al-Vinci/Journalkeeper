@@ -5,8 +5,8 @@ from streamlit_webrtc import webrtc_streamer
 from audio import cleanup_file, clear_saved_wavs, list_saved_wavs, save_temp_audio
 from audio_stream import AudioProcessor
 from generate import generate_journal
-from stream_transcribe import text_queue
-from transcribe import transcribe_audio
+from stream_transcribe import set_use_diarization, text_queue
+from transcribe import transcribe_audio_result
 
 
 # Sätter grundinställningar för Streamlit-sidan.
@@ -14,12 +14,12 @@ st.set_page_config(page_title="Vet Journal AI", layout="wide")
 
 # Visar rubrik och en tydlig varning om att texten bara är ett utkast.
 st.title("Veterinarjournal - AI-utkast")
-st.warning("Detta är ett UTKAST. Måste granskas av veterinär innan användning.")
+st.warning("Detta är ett UTKAST. Maste granskas av veterinar innan anvandning.")
 
 # Den här delen av sidan hanterar live-transkribering från mikrofonen.
 st.subheader("Live transkribering")
 
-# Sparar användarens mikrofonval och live-text i sessionen så att de finns kvar mellan reruns.
+# Sparar användarens mikrofonval, live-text och journalutkast mellan reruns.
 if "echo_cancellation" not in st.session_state:
     st.session_state.echo_cancellation = False
 if "noise_suppression" not in st.session_state:
@@ -28,12 +28,22 @@ if "auto_gain_control" not in st.session_state:
     st.session_state.auto_gain_control = False
 if "full_text" not in st.session_state:
     st.session_state.full_text = ""
-if "live_plain_text" not in st.session_state:
-    st.session_state.live_plain_text = ""
-if "live_role_map" not in st.session_state:
-    st.session_state.live_role_map = {}
+if "live_journal" not in st.session_state:
+    st.session_state.live_journal = ""
 if "live_errors" not in st.session_state:
     st.session_state.live_errors = []
+if "use_diarization" not in st.session_state:
+    st.session_state.use_diarization = False
+
+
+st.checkbox("Anvand diarization", key="use_diarization")
+set_use_diarization(st.session_state.use_diarization)
+
+if st.button("Rensa live-transkribering"):
+    st.session_state.full_text = ""
+    st.session_state.live_journal = ""
+    st.session_state.live_errors = []
+    st.rerun()
 
 
 # Startar WebRTC-förbindelsen som tar emot mikrofonljud i realtid.
@@ -55,12 +65,10 @@ webrtc_ctx = webrtc_streamer(
     async_processing=True,
 )
 
-# Skapar tomma platser i gränssnittet där live-texten kan uppdateras.
-live_diarized_output = st.empty()
-live_plain_output = st.empty()
+# Skapar en tom plats i gränssnittet där live-texten kan uppdateras.
+live_output = st.empty()
 
 # Om inspelningen pågår hämtas nya textbitar från kön och läggs till i hela transkriptet.
-# Här används nu diarization-resultat i stället för bara ren text för att även visa talarroll.
 if webrtc_ctx.state.playing:
     while not text_queue.empty():
         item = text_queue.get()
@@ -69,38 +77,23 @@ if webrtc_ctx.state.playing:
             st.session_state.live_errors.append(item["error"])
             continue
 
-        diarized_text = item.get("diarized_text", "").strip()
-        plain_text = item.get("plain_text", "").strip()
-        speaker_roles = item.get("speaker_roles", {})
-
-        if diarized_text:
+        transcript_text = item.get("journal_text", item.get("text", "")).strip()
+        if transcript_text:
             if st.session_state.full_text:
-                st.session_state.full_text += "\n" + diarized_text
+                separator = "\n" if item.get("diarized_text") else " "
+                st.session_state.full_text += separator + transcript_text
             else:
-                st.session_state.full_text = diarized_text
-
-        if plain_text:
-            if st.session_state.live_plain_text:
-                st.session_state.live_plain_text += " " + plain_text
-            else:
-                st.session_state.live_plain_text = plain_text
-
-        if speaker_roles:
-            st.session_state.live_role_map.update(speaker_roles)
+                st.session_state.full_text = transcript_text
 
     if st.session_state.full_text:
-        live_diarized_output.markdown(st.session_state.full_text)
-    if st.session_state.live_plain_text:
-        live_plain_output.caption(st.session_state.live_plain_text)
+        live_output.markdown(st.session_state.full_text)
 
     time.sleep(0.2)
     st.rerun()
 else:
     # Visar tidigare live-text även när inspelningen stoppat så att användaren kan läsa färdigt resultatet.
     if st.session_state.full_text:
-        live_diarized_output.markdown(st.session_state.full_text)
-    if st.session_state.live_plain_text:
-        live_plain_output.caption(st.session_state.live_plain_text)
+        live_output.markdown(st.session_state.full_text)
 
 # Visar eventuella transkriberingsfel separat så att de inte blandas ihop med journaltexten.
 if st.session_state.live_errors:
@@ -108,13 +101,23 @@ if st.session_state.live_errors:
     for error_text in st.session_state.live_errors[-5:]:
         st.error(error_text)
 
+# gör om live-transkriberingen till journal när användaren är klar med inspelningen.
+if st.session_state.full_text:
+    if st.button("Skapa journal från live-transkribering"):
+        st.info("Skapar journalutkast...")
+        st.session_state.live_journal = generate_journal(st.session_state.full_text)
+
+    if st.session_state.live_journal:
+        st.subheader("Journalutkast från live-transkribering")
+        st.text_area("Redigera vid behov", st.session_state.live_journal, height=300, key="live_journal_editor")
+
 # Låt användaren slå av eller på webbläsarens inbyggda ljudbehandling.
 # Detta behövs eftersom vissa filter kan göra dikterat tal avhugget eller inkomplett.
 with st.expander("Mikrofoninställningar", expanded=True):
     st.checkbox("Echo cancellation", key="echo_cancellation")
     st.checkbox("Noise suppression", key="noise_suppression")
     st.checkbox("Auto gain control", key="auto_gain_control")
-    st.caption("Om ljudet blir avhugget eller pumpande: låt alla tre vara avstängda.")
+    st.caption("Om ljudet blir avhugget eller pumpande: Låt alla tre vara avstangda.")
 
 # Den här delen visar sparade backupfiler från live-inspelning.
 st.subheader("Sparade backupfiler")
@@ -128,38 +131,42 @@ if st.button("Rensa sparade WAV-filer"):
 # Hämtar alla sparade backupfiler så att de kan visas i appen.
 saved_wavs = list_saved_wavs()
 
-# Visar varje sparad fil och lägger till en enkel spelare så att filen kan lyssnas på.
+# Visar varje sparad fil och lägger till en enkel spelare så att filen kan lyssnas pa.
 if saved_wavs:
     for wav_path in saved_wavs:
         st.write(wav_path.name)
         st.audio(str(wav_path), format="audio/wav")
 else:
-    st.info("Inga sparade WAV-filer än.")
+    st.info("Inga sparade WAV-filer an.")
 
 # Den här delen hanterar vanlig filuppladdning som alternativ till live-inspelning.
 audio_file = st.file_uploader("Ladda upp ljud (wav/mp3/m4a)", type=["wav", "mp3", "m4a"])
 
-# Stoppar resten av flödet tills en fil faktiskt valts.
+# Stoppar resten av filflodet tills en fil faktiskt valts.
 if audio_file is None:
-    st.info("Ladda upp en ljudfil för att börja")
+    st.info("Ladda upp en ljudfil för att transkribera och skapa journal.")
     st.stop()
 
 # Hämtar filändelsen för att kunna validera formatet.
 file_extension = audio_file.name.split(".")[-1].lower()
 
-# Blockerar format som inte stöds av systemet.
+# Blockerar format som inte stods av systemet.
 if file_extension not in ["wav", "mp3", "m4a"]:
-    st.error("Endast wav/mp3/m4a stöds")
+    st.error("Endast wav/mp3/m4a stods")
     st.stop()
 
 # Sparar den uppladdade filen tillfälligt på disk så att den kan skickas till transkribering.
 tmp_path = save_temp_audio(audio_file.read(), file_extension)
 
 try:
-    # Gör transkriberingen av ljudfilen och hämtar både ren text och diariserad text.
+    # gör transkriberingen av ljudfilen.
     st.info("Transkriberar...")
-    transcription_result = transcribe_audio(tmp_path)
-    text = transcription_result["plain_text"]
+    transcription_result = transcribe_audio_result(
+        tmp_path,
+        use_diarization=st.session_state.use_diarization,
+    )
+    text = transcription_result["text"]
+    journal_text = transcription_result["journal_text"]
     diarized_text = transcription_result["diarized_text"]
     speaker_roles = transcription_result["speaker_roles"]
 
@@ -167,24 +174,22 @@ try:
     st.subheader("Transkribering")
     st.write(text)
 
-    # Visar diariserad text om flera talare behöver skiljas åt.
-    st.subheader("Diariserad transkribering")
-    st.text_area("Talare och roller", diarized_text, height=220)
+    if diarized_text:
+        st.subheader("Diariserad transkribering")
+        st.text_area("Talare och roller", diarized_text, height=220)
 
-    # Visar den semantiska tolkningen av rollerna om modellen lyckades hitta dem.
     if speaker_roles:
         st.subheader("Identifierade roller")
         for speaker, role in speaker_roles.items():
             st.write(f"Talare {speaker}: {role}")
 
-    # Skickar diariserad text vidare för att skapa ett journalutkast.
-    # Detta gör att journalutkastet får bättre kontext om vem som sagt vad.
+    # Skickar transkriberingen vidare för att skapa ett journalutkast.
     st.info("Skapar journalutkast...")
-    journal = generate_journal(diarized_text)
+    journal = generate_journal(journal_text)
 
     # Visar utkastet i en redigerbar ruta så att användaren kan justera texten.
-    st.subheader("Journalutkast (SOAP)")
-    st.text_area("Redigera vid behov", journal, height=300)
+    st.subheader("Journalutkast")
+    st.text_area("Redigera vid behov", journal, height=300, key="uploaded_journal_editor")
 
     st.success("Klart! Kopiera texten manuellt till journalsystemet.")
 finally:
