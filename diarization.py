@@ -29,7 +29,7 @@ def infer_speaker_roles(segments):
 
     try:
         response = client.chat.completions.create(
-            model="gpt-5.4-mini",
+            model="gpt-5.4",
             temperature=0,
             messages=[
                 {

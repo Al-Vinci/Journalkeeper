@@ -10,7 +10,7 @@ client = OpenAI(api_key=OPENAI_API_KEY_JOURNAL)
 # Prompten ar restriktiv for att minska risken att modellen hittar på information.
 def generate_journal(text):
     response = client.responses.create(
-        model="gpt-5.4-mini",
+        model="gpt-5.4",
         temperature=0,
         input=[
             {

@@ -114,9 +114,9 @@ if st.session_state.full_text:
 # Låt användaren slå av eller på webbläsarens inbyggda ljudbehandling.
 # Detta behövs eftersom vissa filter kan göra dikterat tal avhugget eller inkomplett.
 with st.expander("Mikrofoninställningar", expanded=True):
-    st.checkbox("Echo cancellation", key="echo_cancellation")
-    st.checkbox("Noise suppression", key="noise_suppression")
-    st.checkbox("Auto gain control", key="auto_gain_control")
+    st.checkbox("Ekosläckning", key="echo_cancellation")
+    st.checkbox("Brusdämpning", key="noise_suppression")
+    st.checkbox("Automatisk förstärkning", key="auto_gain_control")
     st.caption("Om ljudet blir avhugget eller pumpande: Låt alla tre vara avstangda.")
 
 # Den här delen visar sparade backupfiler från live-inspelning.
