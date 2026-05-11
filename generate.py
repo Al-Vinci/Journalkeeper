@@ -1,12 +1,12 @@
 from openai_client import create_openai_client
 
 
-# Skapar en OpenAI-klient som anvands for att omvandla transkriberad text till ett journalutkast.
+# Skapar en OpenAI-klient som används för att omvandla transkriberad text till ett journalutkast.
 client = create_openai_client()
 
 
 # Tar den transkriberade texten och ber modellen skapa en journal.
-# Prompten ar restriktiv for att minska risken att modellen hittar på information.
+# Prompten är restriktiv för att minska risken att modellen hittar på information.
 def generate_journal(text):
     response = client.responses.create(
         model="gpt-5.4",

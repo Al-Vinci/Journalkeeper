@@ -4,7 +4,7 @@ from openai_client import create_openai_client
 from text_cleanup import cleanup_transcript_text
 
 
-# Skapar en OpenAI-klient för diarization och semantisk rolltolkning.
+# Skapar en OpenAI-klient för diarisation och semantisk rolltolkning.
 client = create_openai_client()
 
 
@@ -74,7 +74,7 @@ def format_diarized_segments(segments, speaker_roles=None):
     return "\n".join(formatted_lines).strip()
 
 
-# Konverterar diarization-svaret till ett enklare internt format som resten av appen kan använda.
+# Konverterar diarisation-svaret till ett enklare internt format som resten av appen kan använda.
 def build_diarization_result(transcript):
     segments = []
     for segment in transcript.segments:
@@ -97,9 +97,9 @@ def build_diarization_result(transcript):
     }
 
 
-# Kör endast röstbaserad diarization på ett filobjekt och kompletterar med GPT-baserad rolltolkning.
+# Kör endast röstbaserad diarisation på ett filobjekt och kompletterar med GPT-baserad rolltolkning.
 # Denna används för live-chunkar där ljudet redan finns i minnet.
-# chunking_strategy sätts till auto eftersom diarization-modellen kräver chunking
+# chunking_strategy sätts till auto eftersom diarisation-modellen kräver chunking
 # och detta format fungerar stabilare med klientbiblioteket än ett nästlat server_vad-objekt.
 def diarize_audio_fileobj(file_obj):
     transcript = client.audio.transcriptions.create(
@@ -113,7 +113,7 @@ def diarize_audio_fileobj(file_obj):
     return build_diarization_result(transcript)
 
 
-# Kör endast röstbaserad diarization på en ljudfil på disk.
+# Kör endast röstbaserad diarisation på en ljudfil på disk.
 # Denna används för uppladdade filer och sparade backupfiler.
 def diarize_audio(file_path):
     with open(file_path, "rb") as f:

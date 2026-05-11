@@ -24,7 +24,7 @@ def get_use_diarization():
 
 
 # worker kör i bakgrunden och tar emot ljudchunkar en i taget.
-# Varje chunk transkriberas och diariseras bara om det är paslaget i appen.
+# Varje chunk transkriberas och diariseras bara om det är påslaget i appen.
 def worker():
     while True:
         audio_chunk = audio_queue.get()
@@ -42,6 +42,6 @@ def worker():
             text_queue.put({"error": f"[Fel]: {e}"})
 
 
-# Startar bakgrundstraden direkt när modulen laddas så att live-transkribering kan borja utan extra setup.
+# Startar bakgrundstråden direkt när modulen laddas så att live-transkribering kan börja utan extra setup.
 thread = threading.Thread(target=worker, daemon=True)
 thread.start()

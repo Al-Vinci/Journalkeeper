@@ -13,8 +13,8 @@ from transcribe import transcribe_audio_result
 st.set_page_config(page_title="Vet Journal AI", layout="wide")
 
 # Visar rubrik och en tydlig varning om att texten bara är ett utkast.
-st.title("Veterinarjournal - AI-utkast")
-st.warning("Detta är ett UTKAST. Maste granskas av veterinar innan anvandning.")
+st.title("Veterinärjournal - AI-utkast")
+st.warning("Detta är ett UTKAST. Måste granskas av veterinär innan användning.")
 
 # Den här delen av sidan hanterar live-transkribering från mikrofonen.
 st.subheader("Live transkribering")
@@ -36,7 +36,7 @@ if "use_diarization" not in st.session_state:
     st.session_state.use_diarization = False
 
 
-st.checkbox("Anvand diarization", key="use_diarization")
+st.checkbox("Använd diarisation", key="use_diarization")
 set_use_diarization(st.session_state.use_diarization)
 
 if st.button("Rensa live-transkribering"):
@@ -117,7 +117,7 @@ with st.expander("Mikrofoninställningar", expanded=True):
     st.checkbox("Ekosläckning", key="echo_cancellation")
     st.checkbox("Brusdämpning", key="noise_suppression")
     st.checkbox("Automatisk förstärkning", key="auto_gain_control")
-    st.caption("Om ljudet blir avhugget eller pumpande: Låt alla tre vara avstangda.")
+    st.caption("Om ljudet blir avhugget eller pumpande: Låt alla tre vara avstängda.")
 
 # Den här delen visar sparade backupfiler från live-inspelning.
 st.subheader("Sparade backupfiler")
@@ -131,13 +131,13 @@ if st.button("Rensa sparade WAV-filer"):
 # Hämtar alla sparade backupfiler så att de kan visas i appen.
 saved_wavs = list_saved_wavs()
 
-# Visar varje sparad fil och lägger till en enkel spelare så att filen kan lyssnas pa.
+# Visar varje sparad fil och lägger till en enkel spelare så att filen kan lyssnas på.
 if saved_wavs:
     for wav_path in saved_wavs:
         st.write(wav_path.name)
         st.audio(str(wav_path), format="audio/wav")
 else:
-    st.info("Inga sparade WAV-filer an.")
+    st.info("Inga sparade WAV-filer än.")
 
 # Den här delen hanterar vanlig filuppladdning som alternativ till live-inspelning.
 audio_file = st.file_uploader("Ladda upp ljud (wav/mp3/m4a)", type=["wav", "mp3", "m4a"])
@@ -150,9 +150,9 @@ if audio_file is None:
 # Hämtar filändelsen för att kunna validera formatet.
 file_extension = audio_file.name.split(".")[-1].lower()
 
-# Blockerar format som inte stods av systemet.
+# Blockerar format som inte stöds av systemet.
 if file_extension not in ["wav", "mp3", "m4a"]:
-    st.error("Endast wav/mp3/m4a stods")
+    st.error("Endast wav/mp3/m4a stöds")
     st.stop()
 
 # Sparar den uppladdade filen tillfälligt på disk så att den kan skickas till transkribering.

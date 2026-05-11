@@ -5,7 +5,7 @@ from openai_client import create_openai_client
 client = create_openai_client()
 
 
-# Den här funktionen städar transkriptet utan att skriva om innehallet för mycket.
+# Den här funktionen städar transkriptet utan att skriva om innehållet för mycket.
 # Syftet är att ta bort tydligt brus och hallucinationer samt göra texten mer läsbar.
 def cleanup_transcript_text(text):
     cleaned_input = text.strip()
@@ -19,7 +19,7 @@ def cleanup_transcript_text(text):
                 {
                     "role": "system",
                     "content": (
-                        "Du städar lätt en svensk veterinardiktering från tal-till-text. "
+                        "Du städar lätt en svensk veterinärdiktering från tal-till-text. "
                         "Ta bort uppenbart hallucinerat nonsens från tystnad eller brus, "
                         "fixa enkel interpunktion och små fel, men lägg inte till fakta. "
                         "Behåll ordvalet så nära originalet som möjligt. "

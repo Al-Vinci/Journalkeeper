@@ -23,7 +23,7 @@ def transcribe_audio(file_path):
         return transcribe_audio_fileobj(f)
 
 
-# Bygger ett gemensamt resultatformat för appen, med eller utan diarization.
+# Bygger ett gemensamt resultatformat för appen, med eller utan diarisation.
 def build_transcription_result(plain_text, diarization_result=None):
     diarization_result = diarization_result or {}
     diarized_text = diarization_result.get("diarized_text", "").strip()
@@ -38,7 +38,7 @@ def build_transcription_result(plain_text, diarization_result=None):
     }
 
 
-# kör transkribering och valfri diarization på ett filobjekt.
+# Kör transkribering och valfri diarisation på ett filobjekt.
 def transcribe_audio_result_fileobj(file_obj, use_diarization=False):
     plain_text = transcribe_audio_fileobj(file_obj)
 
@@ -52,7 +52,7 @@ def transcribe_audio_result_fileobj(file_obj, use_diarization=False):
     return build_transcription_result(plain_text, diarization_result)
 
 
-# kör transkribering och valfri diarization på en ljudfil på disk.
+# Kör transkribering och valfri diarisation på en ljudfil på disk.
 def transcribe_audio_result(file_path, use_diarization=False):
     with open(file_path, "rb") as f:
         return transcribe_audio_result_fileobj(f, use_diarization=use_diarization)
