@@ -1,4 +1,5 @@
 streamlit
+gradio
 openai
 python-dotenv
 streamlit-webrtc

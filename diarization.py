@@ -1,13 +1,11 @@
 import json
 
-from openai import OpenAI
-
-from config import OPENAI_API_KEY_JOURNAL
+from openai_client import create_openai_client
 from text_cleanup import cleanup_transcript_text
 
 
 # Skapar en OpenAI-klient för diarization och semantisk rolltolkning.
-client = OpenAI(api_key=OPENAI_API_KEY_JOURNAL)
+client = create_openai_client()
 
 
 # Försöker tolka vilken roll varje talare har i dialogen.

@@ -1,9 +1,8 @@
-from openai import OpenAI
-from config import OPENAI_API_KEY_JOURNAL
+from openai_client import create_openai_client
 
 
 # Skapar en OpenAI-klient som anvands for att omvandla transkriberad text till ett journalutkast.
-client = OpenAI(api_key=OPENAI_API_KEY_JOURNAL)
+client = create_openai_client()
 
 
 # Tar den transkriberade texten och ber modellen skapa en journal.

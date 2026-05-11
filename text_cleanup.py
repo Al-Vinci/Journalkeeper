@@ -1,10 +1,8 @@
-from openai import OpenAI
-
-from config import OPENAI_API_KEY_JOURNAL
+from openai_client import create_openai_client
 
 
 # Skapar en OpenAI-klient för lätt efterbearbetning av transkriberad text.
-client = OpenAI(api_key=OPENAI_API_KEY_JOURNAL)
+client = create_openai_client()
 
 
 # Den här funktionen städar transkriptet utan att skriva om innehallet för mycket.

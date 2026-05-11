@@ -1,11 +1,9 @@
-from openai import OpenAI
-
-from config import OPENAI_API_KEY_JOURNAL
+from openai_client import create_openai_client
 from text_cleanup import cleanup_transcript_text
 
 
 # Skapar en OpenAI-klient för ren transkribering.
-client = OpenAI(api_key=OPENAI_API_KEY_JOURNAL)
+client = create_openai_client()
 
 
 # kör vanlig transkribering på ett filobjekt.
