@@ -12,7 +12,7 @@ from transcribe import transcribe_audio_result
 # Sätter grundinställningar för Streamlit-sidan.
 st.set_page_config(page_title="Vet Journal AI", layout="wide")
 
-# Visar rubrik och en tydlig varning om att texten bara är ett utkast.
+# Visar rubrik och en tydlig varning.
 st.title("Veterinärjournal - AI-utkast")
 st.warning("Detta är ett UTKAST. Måste granskas av veterinär innan användning.")
 
