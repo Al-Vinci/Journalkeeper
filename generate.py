@@ -38,6 +38,8 @@ Regler:
 - Skriv endast det som explicit nämns
 - Ingen extra text före eller efter
 
+Baserat på behandlingen i den transkriberade texten, skriv ett hemgångsråd efter journalen. 
+
 Text:
 {text}
 """

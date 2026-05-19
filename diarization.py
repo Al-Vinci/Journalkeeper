@@ -74,7 +74,7 @@ def format_diarized_segments(segments, speaker_roles=None):
     return "\n".join(formatted_lines).strip()
 
 
-# Konverterar diarisation-svaret till ett enklare internt format som resten av appen kan använda.
+# Konverterar diarisationssvaret till ett enklare internt format som resten av appen kan använda.
 def build_diarization_result(transcript):
     segments = []
     for segment in transcript.segments:

@@ -67,7 +67,7 @@ class AudioProcessor(AudioProcessorBase):
             rate=self.sample_rate,
         )
 
-        # Öppnar en backupfil som hela live-inspelningen skrivs till löpande.
+        # Öppnar en backup-fil som hela live-inspelningen skrivs till löpande.
         self.recording_path = create_live_recording_path()
         self.recording_file = open(self.recording_path, "wb")
         self.recording_wav = wave.open(self.recording_file, "wb")

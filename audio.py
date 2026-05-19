@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-# Den här mappen används för att spara backupfiler från live-inspelning.
+# Den här mappen används för att spara backup-filer från live-inspelning.
 RECORDINGS_DIR = Path("saved_wavs")
 
 
@@ -34,7 +34,7 @@ def cleanup_file(path):
         os.remove(path)
 
 
-# Ser till att mappen för sparade backupfiler alltid finns innan den används.
+# Ser till att mappen för sparade backup-filer alltid finns innan den används.
 def ensure_recordings_dir():
     RECORDINGS_DIR.mkdir(exist_ok=True)
     return RECORDINGS_DIR

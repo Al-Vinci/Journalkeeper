@@ -159,7 +159,7 @@ def generate_from_edited_text(plain_text, diarized_text, use_diarization):
         return "", f"Fel: {error}"
 
 
-# Gradio-gränssnittet motsvarar Streamlit-appen men är enklare:
+# Gradio-gränssnittet motsvarar ungefär Streamlit-appen:
 # ljud spelas in/laddas upp först och bearbetas sedan när användaren klickar på knappen.
 with gr.Blocks(title="Vet Journal AI") as demo:
     gr.Markdown("# Veterinärjournal - AI-utkast")

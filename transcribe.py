@@ -6,7 +6,7 @@ from text_cleanup import cleanup_transcript_text
 client = create_openai_client()
 
 
-# kör vanlig transkribering på ett filobjekt.
+# kör vanlig transkribering på ett fil-objekt.
 def transcribe_audio_fileobj(file_obj):
     transcript = client.audio.transcriptions.create(
         model="gpt-4o-transcribe",
@@ -23,7 +23,7 @@ def transcribe_audio(file_path):
         return transcribe_audio_fileobj(f)
 
 
-# Bygger ett gemensamt resultatformat för appen, med eller utan diarisation.
+# Bygger ett gemensamt resultatformat för appen, med eller utan diarisering.
 def build_transcription_result(plain_text, diarization_result=None):
     diarization_result = diarization_result or {}
     diarized_text = diarization_result.get("diarized_text", "").strip()
@@ -38,7 +38,7 @@ def build_transcription_result(plain_text, diarization_result=None):
     }
 
 
-# Kör transkribering och valfri diarisation på ett filobjekt.
+# Kör transkribering och valfri diarisering på ett fil-objekt.
 def transcribe_audio_result_fileobj(file_obj, use_diarization=False):
     plain_text = transcribe_audio_fileobj(file_obj)
 
@@ -52,7 +52,7 @@ def transcribe_audio_result_fileobj(file_obj, use_diarization=False):
     return build_transcription_result(plain_text, diarization_result)
 
 
-# Kör transkribering och valfri diarisation på en ljudfil på disk.
+# Kör transkribering och valfri diarisering på en ljudfil på disk.
 def transcribe_audio_result(file_path, use_diarization=False):
     with open(file_path, "rb") as f:
         return transcribe_audio_result_fileobj(f, use_diarization=use_diarization)
